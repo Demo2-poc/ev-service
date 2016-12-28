@@ -1,0 +1,8 @@
+package ev.service;
+
+public interface EvService {
+	
+	public String getXidBySwid(String replaceAll);
+
+	public void storeEntitlement(String xid, String entIdType, String entIdValue);
+}
