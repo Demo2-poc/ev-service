@@ -2,6 +2,7 @@ package ev.controller;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,51 +23,66 @@ public class EvServiceController {
 
 	@Autowired
 	EvService evService;
-	
+
 	public static final String OBJECT_KEY = "RESERVATION.PAYLOAD";
-	
+	final static Logger logger = Logger.getLogger(EvServiceController.class);
 	@Autowired
 	@Qualifier("redisTemplate")
 	private RedisTemplate<String, String> redisTemplate;
 
 	@RequestMapping(value = "/providexid", method = RequestMethod.POST)
 	public ResponseEntity<String> provideXid(@RequestBody String swid) {
-
+		long startTime = System.currentTimeMillis();
+		logger.debug("started provideXid service is invoked start time in ms =" + startTime);
 		String xid = "";
 		ResponseEntity<String> resp = null;
-
 		try {
 			xid = evService.getXidBySwid(swid);
 			if (!xid.equals("")) {
 				xid = GSUtil.generateXID();
 			}
-			resp = new ResponseEntity<String>(xid,HttpStatus.OK);
+			resp = new ResponseEntity<String>(xid, HttpStatus.OK);
 		} catch (Exception e) {
-			resp = new ResponseEntity<String>("",HttpStatus.INTERNAL_SERVER_ERROR);
+			logger.error(e.getMessage());		
+			resp = new ResponseEntity<String>("", HttpStatus.INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+		long durationTaken = System.currentTimeMillis() - startTime;
+		logger.debug("total time taken to process request ms =" + durationTaken);
 		return resp;
 	}
-	
+
 	@RequestMapping(value = "/storeentitlement", method = RequestMethod.POST)
-	public void storeEntitlement(@RequestParam("xid") String xid,@RequestParam("entIdType") String entIdType,@RequestParam("entIdValue") String entIdValue){
-		try{
-			evService.storeEntitlement(xid,entIdType,entIdValue);
+	public void storeEntitlement(@RequestParam("xid") String xid, @RequestParam("entIdType") String entIdType,
+			@RequestParam("entIdValue") String entIdValue) {
+		long startTime = System.currentTimeMillis();
+		logger.debug("started storeEntitlement service is invoked start time in ms =" + startTime);
+		try {
+			evService.storeEntitlement(xid, entIdType, entIdValue);
 			this.redisTemplate.opsForHash().delete(OBJECT_KEY, entIdValue);
-		}catch (Exception e) {
+			long durationTaken = System.currentTimeMillis() - startTime;
+			logger.debug("total time taken to process request ms =" + durationTaken);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	@RequestMapping(value = "/{xidvalue}", method = RequestMethod.GET)
 	public Map getENTypeValue(@PathVariable String xidvalue) {
-	Map<String, String> map = null;
-		System.out.println("*********"+xidvalue);
-		map = evService.getEvDetails(xidvalue);		
-				
+		long startTime = System.currentTimeMillis();
+		logger.debug("started getENTypeValue service is invoked start time in ms =" + startTime);
+		Map<String, String> map = null;
+		try {
+			map = evService.getEvDetails(xidvalue);
+			long durationTaken = System.currentTimeMillis() - startTime;
+			logger.debug("total time taken to process request ms =" + durationTaken);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			e.printStackTrace();
+		}
 		return map;
 	}
-	
+
 }
