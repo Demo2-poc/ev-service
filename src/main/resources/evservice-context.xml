@@ -27,10 +27,10 @@
 	
 	<!-- ats datasource configuration starts here -->
 	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"	destroy-method="close">
-			<beans:property name="driverClassName" value="${driverClassName}" />
-			<beans:property name="url"	value="${url}" />
-			<beans:property name="username" value="${username}" />
-			<beans:property name="password" value="${password}" />
+		<beans:property name="driverClassName" value="${driverClassName}" />
+		<beans:property name="url"	value="${url}" />
+		<beans:property name="username" value="${username}" />
+		<beans:property name="password" value="${password}" />
 	</beans:bean>
 	
 		
